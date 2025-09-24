@@ -11,5 +11,7 @@ public class Compte extends PanacheEntity {
 
     public int soldePoints = 0;
     @Column(unique = true)
+    public String cle;
     public String clientPhone;
+    public Long idEntreprise;
 }

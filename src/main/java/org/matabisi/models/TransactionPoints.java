@@ -19,4 +19,9 @@ public class TransactionPoints extends PanacheEntity {
     public String clientPhone;
 
     public Long idProduit; // seulement si transaction liée à un scan produit
+
+    public Long idEntreprise;
+
+    public Double lon;
+    public Double lat;
 }

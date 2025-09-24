@@ -10,6 +10,7 @@ import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.matabisi.models.Client;
 import org.matabisi.models.Compte;
+import org.matabisi.models.Entreprise;
 
 import java.io.IOException;
 import java.net.ProxySelector;
@@ -21,6 +22,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 
 @Path("/api/Client")
 @Produces(MediaType.APPLICATION_JSON)
@@ -79,19 +81,50 @@ public class ClientResource {
         Client client1 = Client.find("telephone", client.telephone).firstResult();
         if (client1 != null) {
             client1.nom = client.nom;
+            // créer un compte lié automatiquement
+            List<Entreprise> entrepriseList = Entreprise.listAll();
+            //
+            System.out.println("Le entrepriseList: "+entrepriseList.size());
+            //
+            entrepriseList.forEach((e) -> {
+                //
+                HashMap<String, Object> params = new HashMap<>();
+                params.put("idEntreprise", e.id);
+                params.put("clientPhone", client1.telephone);
+
+                Compte compte = Compte.find("idEntreprise =: idEntreprise and clientPhone =: clientPhone", params).firstResult();
+                //
+                System.out.println("Le compte: "+compte.clientPhone);
+                 //
+                if(compte == null){
+                    Compte compte1 = new Compte();
+                    compte1.clientPhone = client1.telephone;
+                    compte1.cle = client1.telephone+""+e.id;
+                    compte1.soldePoints = 0;
+                    compte1.idEntreprise = e.id;
+                    compte1.persist();
+                }
+            });
+            //
             return client1;
         } else {
             client.persist();
-
             // créer un compte lié automatiquement
-            try {
-                Compte compte = new Compte();
-                compte.clientPhone = client.telephone;
-                compte.soldePoints = 0;
-                compte.persist();
-            } catch (Exception e) {
-                System.out.println("Ce compte exite déjà.");
-            }
+            List<Entreprise> entrepriseList = Entreprise.listAll();
+            //
+            entrepriseList.forEach((e) -> {
+                //
+                try {
+                    Compte compte = new Compte();
+                    compte.clientPhone = client1.telephone;
+                    compte.cle = client1.telephone+""+e.id;
+                    compte.soldePoints = 0;
+                    compte.idEntreprise = e.id;
+                    compte.persist();
+                } catch (Exception ee) {
+                    System.out.println("Ce compte exite déjà. "+ee.getMessage());
+                }
+            });
 
             return client;
         }

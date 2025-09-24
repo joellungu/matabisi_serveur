@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 
 @Entity
 public class ProduitCategorie extends PanacheEntity {
+
+    //
     public byte[] logo;
     public String nom;
     public String description;

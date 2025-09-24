@@ -133,7 +133,7 @@ public class EntrepriseResource {
             //
             ents.add(ent);
         });
-         //
+        //
         return Response.ok().entity(ents).build();
     }
 
@@ -162,22 +162,37 @@ public class EntrepriseResource {
     @PUT
     @Path("/{id}")
     @Transactional
-    public Entreprise update(@PathParam("id") Long id, Entreprise data) {
+    public String update(@PathParam("id") Long id, Entreprise data) {
         Entreprise entreprise = entrepriseRepository.findById(id);
         if (entreprise == null) {
             throw new NotFoundException("Entreprise not found");
         }
 
-        entreprise.nom = data.nom;
-        entreprise.secteur = data.secteur;
-        entreprise.email = data.email;
-
-        if (data.motDePasse != null && !data.motDePasse.isBlank()) {
-            entreprise.motDePasse = BcryptUtil.bcryptHash(data.motDePasse);
+        if(data.logo == null) {
+            //
+            if (data.motDePasse != null && !data.motDePasse.isBlank()) {
+                entreprise.motDePasse = BcryptUtil.bcryptHash(data.motDePasse);
+            }
+            //
+            entreprise.nom = data.nom;
+            entreprise.secteur = data.secteur;
+            entreprise.email = data.email;
+            entreprise.fraisRetraitUSD = data.fraisRetraitUSD;
+        } else {
+            //
+            if (data.motDePasse != null && !data.motDePasse.isBlank()) {
+                entreprise.motDePasse = BcryptUtil.bcryptHash(data.motDePasse);
+            }
+            //
+            entreprise.logo = data.logo;
+            entreprise.nom = data.nom;
+            entreprise.secteur = data.secteur;
+            entreprise.email = data.email;
+            entreprise.fraisRetraitUSD = data.fraisRetraitUSD;
         }
 
-        entreprise.logo = data.logo;
-        return entreprise;
+        //entreprise.logo = data.logo;
+        return "Mise à jour éffectué";
     }
 
     @PUT
@@ -201,6 +216,7 @@ public class EntrepriseResource {
         if (entreprise == null) {
             throw new NotFoundException("Entreprise not found");
         }
+        CompteEntreprise.delete("idEntreprise", id);
         entrepriseRepository.delete(entreprise);
         return Response.noContent().build();
     }

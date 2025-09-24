@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
+import java.time.LocalDateTime;
+
 @Entity
 public class Produit extends PanacheEntity {
 
@@ -15,6 +17,5 @@ public class Produit extends PanacheEntity {
     public int valeurPoints;
     public boolean utilise = false;
     public Long idEntreprise;
-    public Long lon;
-    public Long lat;
+    public LocalDateTime updatedAt;
 }

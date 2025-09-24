@@ -55,7 +55,7 @@ public class ProduitCategorieResource {
             //
             ents.add(ent);
         });
-         //
+        //
         return ents;
     }
 

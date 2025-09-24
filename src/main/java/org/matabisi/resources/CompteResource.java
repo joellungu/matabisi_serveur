@@ -56,9 +56,16 @@ public class CompteResource {
 
     @GET
     @Path("client/{telephone}")
-    public Compte compteClient(@PathParam("telephone") String telephone) {
+    public int compteClient(@PathParam("telephone") String telephone) {
 
-        return Compte.find("clientPhone",telephone).firstResult();
+        int points = 0;
+        List<Compte> comptes = Compte.find("clientPhone",telephone).list();
+        for(Compte p : comptes) {
+            points = points + p.soldePoints;
+        };
+
+
+        return points;
     }
 
 

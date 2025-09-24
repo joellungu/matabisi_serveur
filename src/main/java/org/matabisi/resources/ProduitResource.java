@@ -1,6 +1,7 @@
 package org.matabisi.resources;
 
 
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -36,8 +37,15 @@ public class ProduitResource {
 
     @GET
     @Path("all/{id}/{nomCategorie}")
-    public List<HashMap> getAllByIdEnt(@PathParam("id") Long id, @PathParam("nomCategorie") String nomCategorie) {
-        List<Produit> produitCategories = Produit.find("idEntreprise = ?1 and utilise = ?2 and nomCategorie = ?3", id, false, nomCategorie).list();
+    public List<HashMap> getAllByIdEnt(@PathParam("id") Long id, @PathParam("nomCategorie") String nomCategorie,
+                                       @QueryParam("page") @DefaultValue("0") int page) {
+        PanacheQuery<Produit> query = Produit.find("idEntreprise = ?1 and utilise = ?2 and nomCategorie = ?3", id, false, nomCategorie);
+        //
+        int pageSize = 20;
+        //PanacheQuery<Produit> query = Produit.findAll();
+        List<Produit> produitCategories = query.list();
+        query.page(page, pageSize);
+        System.out.println("La taille: "+produitCategories.size());
         //
         List<HashMap> ents = new LinkedList<>();
         //
@@ -88,5 +96,11 @@ public class ProduitResource {
         Produit.deleteById(id);
         //categorie.persist();
         return Response.status(Response.Status.OK).build();
+    }
+
+    @GET
+    @Path("/count")
+    public long countProduits() {
+        return Produit.count();
     }
 }

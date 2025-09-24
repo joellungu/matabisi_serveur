@@ -32,6 +32,7 @@ public class AuthResource {
         public String nom;
         public String email;
         public String secteur;
+        public int fraisRetraitUSD;
     }
 
     @POST
@@ -63,6 +64,7 @@ public class AuthResource {
         response.nom = entreprise.nom;
         response.email = entreprise.email;
         response.secteur = entreprise.secteur;
+        response.fraisRetraitUSD = entreprise.fraisRetraitUSD;
 
         return Response.ok(response).build();
     }
