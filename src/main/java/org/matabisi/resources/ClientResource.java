@@ -42,6 +42,7 @@ public class ClientResource {
     @Transactional
     public Response enoiSMS(HashMap<String, String> client) throws IOException, URISyntaxException, InterruptedException {
         //String message = "<#> Votre code est :"+code+"\n"+signature;
+        /*
         HashMap params = new HashMap();
         params.put("token", "HG59P642KW9AQ2M");//HG59P642KW9AQ2M
         params.put("to", client.get("telephone"));
@@ -54,7 +55,36 @@ public class ClientResource {
         //
         ObjectMapper obj = new ObjectMapper();
         String data = obj.writeValueAsString(params);
-        String reponse = veriSMS(data);
+        */
+        System.out.println("Téléphone: "+client.get("telephone"));
+        //
+        HashMap params = new HashMap();
+        params.put("token", "HG59P642KW9AQ2M");//HG59P642KW9AQ2M
+        params.put("to", client.get("telephone"));
+        params.put("from", "DESS JURY");//MYLINAFOOT//CandyShop//DESS JURY
+        //params.put("message", "<#> Votre code est :" + client.get("code") + "\n" + client.get("signature"));
+        params.put("message", "Votre code est :" + client.get("code"));
+                //
+        ObjectMapper obj = new ObjectMapper();
+        String data = null;
+        try {
+            data = obj.writeValueAsString(params);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        //
+        String reponse = "";
+        //
+        try {
+            reponse = veriSMS(data);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        //String reponse = veriSMS(data);
         ObjectMapper mapper = new ObjectMapper();
         //
         String nomComplet = "";
@@ -206,4 +236,5 @@ public class ClientResource {
             return "status: erreur";
         }
     }
+
 }

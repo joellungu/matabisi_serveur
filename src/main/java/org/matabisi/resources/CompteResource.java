@@ -15,6 +15,7 @@ import jakarta.ws.rs.core.MediaType;
 import org.matabisi.models.*;
 import org.matabisi.services.PointsService;
 
+import java.util.HashMap;
 import java.util.List;
 
 @Path("/api/Compte")
@@ -37,6 +38,20 @@ public class CompteResource {
     @GET
     public List<Compte> listAll() {
         return Compte.listAll();
+    }
+
+    @GET
+    @Path("points/{cle}")
+    public HashMap getPoints(@PathParam("cle") String cle) {
+        Compte compte = Compte.find("cle", cle).firstResult();
+        if (compte == null) {
+            throw new NotFoundException("Entreprise not found");
+        }
+        //
+        HashMap pts = new HashMap();
+        pts.put("points", compte.soldePoints);
+        //
+        return pts;
     }
 
     // 🔹 Read by id
