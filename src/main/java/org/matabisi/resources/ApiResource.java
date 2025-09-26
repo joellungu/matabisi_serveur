@@ -17,8 +17,6 @@ import java.util.List;
 @Tag(name = "API Resource", description = "Gestion des utilisateurs")
 public class ApiResource {
 
-
-
     // --------------------------
     // ENTREPRISES & PRODUITS
     // --------------------------

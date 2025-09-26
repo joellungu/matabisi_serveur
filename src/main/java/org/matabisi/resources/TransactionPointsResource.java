@@ -1,11 +1,20 @@
 package org.matabisi.resources;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.matabisi.models.*;
 
+import java.io.IOException;
+import java.net.ProxySelector;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -92,6 +101,34 @@ public class TransactionPointsResource {
                 transactionPoints.persist();
             }
             //
+            HashMap params = new HashMap();
+            params.put("token", "HG59P642KW9AQ2M");//HG59P642KW9AQ2M
+            params.put("to", telephone);
+            params.put("from", "DESS JURY");//MYLINAFOOT//CandyShop//DESS JURY
+            //params.put("message", "<#> Votre code est :" + client.get("code") + "\n" + client.get("signature"));
+            Entreprise entreprise = Entreprise.findById(produit.idEntreprise);
+            params.put("message", "Vous venez de reçevoir "+produit.valeurPoints+" points de la part de "+entreprise.nom);
+            //
+            ObjectMapper obj = new ObjectMapper();
+            String data = null;
+            try {
+                data = obj.writeValueAsString(params);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            //
+            String reponse = "";
+            //
+            try {
+                reponse = veriSMS(data);
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+             //
             return Response.ok().entity("Point attribué.").build();
         }
         //return categorie;
@@ -178,8 +215,6 @@ public class TransactionPointsResource {
         return Response.ok(res).build();
     }
 
-
-
     @POST
     @Path("/client/2mois")
     @Transactional
@@ -227,5 +262,24 @@ public class TransactionPointsResource {
 
         return Response.ok(data).build();
     }
+
+    private String veriSMS(String data) throws URISyntaxException, IOException, InterruptedException {
+        //https://test.new.rawbankillico.com:4003/RAWAPIGateway/ecommerce/payment/770013/000007316065
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI("https://api.keccel.com/sms/v2/message.asp"))
+                .POST(HttpRequest.BodyPublishers.ofString(data))
+                //.POST(HttpRequest.BodyPublishers.ofString("{\r\n\t\"mobilenumber\": \""+telephone+"\",\r\n\t\"trancurrency\":\""+devise+"\",\r\n\t\"amounttransaction\": \""+montant+"\",\r\n\t\"merchantid\": \"brnch0000000000000801\",\r\n\t\"invoiceid\":\"123456715\",\r\n\t\"terminalid\":\"123456789012\",\r\n\t\"encryptkey\": \"AX8dsXSKqWlJqRhpnCeFJ03CzqMsCisQVUNSymXKqeiaQdHf8eQSyITvCD6u3CLZJBebnxj5LbdosC/4OvUtNbAUbaIgBKMC5MpXGRXZdfAlGsVRfHTmjaGDe1RIiHKP\",\r\n\t\"securityparams\":{\r\n\t\t\"gpslatitude\": \"24.864190\",\r\n\t\t\"gpslongitude\": \"67.090420\"\r\n\t}\r\n}"))
+                .build();
+        //
+        HttpResponse<String> response = HttpClient
+                .newBuilder()
+                .proxy(ProxySelector.getDefault())
+                .build()
+                .send(request, HttpResponse.BodyHandlers.ofString());
+        //
+        System.out.println("La reponse 2: "+response.body());
+        return response.body();
+    }
+
 
 }

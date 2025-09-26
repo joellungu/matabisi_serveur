@@ -61,6 +61,12 @@ public class EntrepriseResource {
                 compte.idEntreprise = entreprise.id;
                 compte.soldePoints = 0;
                 compte.persist();
+                //
+                CreditEntreprise creditEntreprise = new CreditEntreprise();
+                creditEntreprise.idEntreprise = entreprise.id;
+                creditEntreprise.solde = 0.0;
+                creditEntreprise.persist();
+                //
             } catch (Exception e) {
                 System.out.println("Ce compte exite déjà.");
             }
@@ -69,37 +75,6 @@ public class EntrepriseResource {
         return Response.status(Response.Status.CREATED).entity(entreprise).build();
     }
     ///
-
-    /*
-    @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response create(@RestForm String nom,
-                           @RestForm String secteur,
-                           @RestForm String email,
-                           @RestForm String motDePasse,
-                           @RestForm FileUpload logo) throws IOException {
-        Entreprise e = new Entreprise();
-        e.nom = nom;
-        e.secteur = secteur;
-        e.email = email;
-        e.motDePasse = BcryptUtil.bcryptHash(motDePasse);
-        //e.logo = logo.;
-        if (logo != null) {
-            e.logo = Files.readAllBytes(Paths.get(logo.uploadedFileName()));
-        }
-        //
-        e.persist(); // Panache persiste automatiquement
-
-        return Response.status(Response.Status.CREATED).entity(e).build();
-    }
-    */
-
-    /* READ ALL
-    @GET
-    public List<Entreprise> listAll() {
-        return entrepriseRepository.listAll();
-    }
-    */
 
     @GET
     public List<EntrepriseDTO> getEntreprisesAvecProduits() {

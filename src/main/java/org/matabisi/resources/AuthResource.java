@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.matabisi.models.Entreprise;
 import org.matabisi.services.EntrepriseRepository;
 
@@ -16,6 +17,9 @@ import java.time.Duration;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthResource {
+
+    @Inject
+    JsonWebToken jwt;
 
     @Inject
     EntrepriseRepository entrepriseRepository;
@@ -91,6 +95,45 @@ public class AuthResource {
         response.secteur = "Administration";
 
         return Response.ok(response).build();
+    }
+
+    @POST
+    @Path("/update-password")
+    @Transactional
+    public Response updatePassword(UpdatePasswordRequest request) {
+        // Récupérer l'email à partir du token JWT
+        String email = jwt.getSubject();
+        System.out.println("L'email: "+email);
+        System.out.println("L'email: "+request.newPassword);
+
+        Entreprise entreprise = Entreprise.find("email", email).firstResult();
+        if (entreprise == null) {
+            System.out.println("L'email: "+email);
+            System.out.println("L'email: "+request.newPassword);
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        if (!BcryptUtil.matches(request.getOldPassword(), entreprise.motDePasse)) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Ancien mot de passe incorrect").build();
+        }
+
+        String newPasswordHash = BcryptUtil.bcryptHash(request.getNewPassword());
+        entreprise.motDePasse = newPasswordHash;
+
+        entreprise.persist();
+
+        return Response.ok().build();
+    }
+
+    public static class UpdatePasswordRequest {
+        private String oldPassword;
+        private String newPassword;
+
+        // Getters and setters
+        public String getOldPassword() { return oldPassword; }
+        public void setOldPassword(String oldPassword) { this.oldPassword = oldPassword; }
+        public String getNewPassword() { return newPassword; }
+        public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
     }
 
 }
